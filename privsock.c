@@ -56,13 +56,15 @@ void priv_sock_send_cmd(int fd, char cmd)
 	}
 }
 
-char priv_sock_get_cmd(int fd)
+char priv_sock_get_cmd(int fd) //读取儿子进程发送来的消息或命令
 {
 	char res;
 	int ret;
-	ret = readn(fd, &res, sizeof(res));
-	if (ret == 0)
-	{
+	ret = readn(fd, &res, sizeof(res)); //读取儿子进程发送来的消息(命令)
+	if (ret == 0)  //因为孙子进程退出的时候，会关闭所有的套接字资源
+	{              //没有关闭的时候，儿子进程可以阻塞在这里接收命令，
+		           //现在关闭了，那么ret返回值为0,儿子进程就知道是孙子进程结束了
+				   //从而在这里退出儿子进程。
 		printf("ftp process exit\n");
 		exit(EXIT_SUCCESS);
 	}

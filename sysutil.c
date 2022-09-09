@@ -604,7 +604,7 @@ const char* statbuf_get_date(struct stat *sbuf)
 	return datebuf;
 }
 
-static int lock_internal(int fd, int lock_type)
+static int lock_internal(int fd, int lock_type) //给出锁类型就好
 {
 	int ret;
 	struct flock the_lock;
@@ -639,12 +639,12 @@ int unlock_file(int fd)
 	int ret;
 	struct flock the_lock;
 	memset(&the_lock, 0, sizeof(the_lock));
-	the_lock.l_type = F_UNLCK;
+	the_lock.l_type = F_UNLCK;  
 	the_lock.l_whence = SEEK_SET;
 	the_lock.l_start = 0;
 	the_lock.l_len = 0;
 
-	ret = fcntl(fd, F_SETLK, &the_lock);
+	ret = fcntl(fd, F_SETLK, &the_lock);  //解锁是一次性的动作，不需要循环
 
 	return ret;
 }

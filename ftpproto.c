@@ -8,17 +8,17 @@
 
 void ftp_lreply(session_t *sess, int status, const char *text);
 
-void handle_alarm_timeout(int sig);
-void handle_sigalrm(int sig);
+void handle_alarm_timeout(int sig); //处理闹钟
+void handle_sigalrm(int sig);  //处理重新安装的闹钟信号(主要是数据连接空闲带来了影响)
 void handle_sigurg(int sig);
-void start_cmdio_alarm(void);
-void start_data_alarm(void);
+void start_cmdio_alarm(void);  //开始闹钟。控制连接闹钟。
+void start_data_alarm(void);   //重新安装闹钟信号，之前的自动失效。数据连接闹钟
 
 void check_abor(session_t *sess);
 
 int list_common(session_t *sess, int detail);
 void limit_rate(session_t *sess, int bytes_transfered, int is_upload);
-void upload_common(session_t *sess, int is_append);
+void upload_common(session_t *sess, int is_append); //是否是appe的方式
 
 int get_port_fd(session_t *sess);
 int get_pasv_fd(session_t *sess);
@@ -116,27 +116,28 @@ static ftpcmd_t ctrl_cmds[] = {
 	{"ALLO",	NULL	}
 };
 
-session_t *p_sess;
+session_t *p_sess; //因为我们没有给下面这个函数传递session，
+                   //但是我们下面这个函数又需要session
 
 void handle_alarm_timeout(int sig)
 {
-	shutdown(p_sess->ctrl_fd, SHUT_RD);
-	ftp_reply(p_sess, FTP_IDLE_TIMEOUT, "Timeout.");
-	shutdown(p_sess->ctrl_fd, SHUT_WR);
-	exit(EXIT_FAILURE);
+	shutdown(p_sess->ctrl_fd, SHUT_RD); //(系统函数)先关闭读的这一半，即不再接收客户端的消息
+	ftp_reply(p_sess, FTP_IDLE_TIMEOUT, "Timeout."); //给客户端发回响应
+	shutdown(p_sess->ctrl_fd, SHUT_WR); //再关闭读的这一半，不再给客户端发送消息了
+	exit(EXIT_FAILURE); //孙子进程退出,将会导致儿子进程也退出
 }
 
 void handle_sigalrm(int sig)
 {
-	if (!p_sess->data_process)
+	if (!p_sess->data_process) //数据连接开始，但是没有在传输数据的状态
 	{
 		ftp_reply(p_sess, FTP_DATA_TIMEOUT, "Data timeout. Reconnect. Sorry.");
 		exit(EXIT_FAILURE);
 	}
 
 	// 否则，当前处于数据传输的状态收到了超时信号
-	p_sess->data_process = 0;
-	start_data_alarm();
+	p_sess->data_process = 1;  //标记它是在传输数据
+	start_data_alarm(); //那么重新启动数据连接闹钟
 }
 
 void handle_sigurg(int sig)
@@ -174,30 +175,32 @@ void check_abor(session_t *sess)
 	}
 }
 
-void start_cmdio_alarm(void)
+void start_cmdio_alarm(void)  
 {
 	if (tunable_idle_session_timeout > 0)
 	{
 		// 安装信号
 		signal(SIGALRM, handle_alarm_timeout);
-		// 启动闹钟
+		// 启动闹钟(经过timeout这么长的时间以后将会发送SIGALRM信号给当前进程)
 		alarm(tunable_idle_session_timeout);
 	}
 }
 
 void start_data_alarm(void)
 {
-	if (tunable_data_connection_timeout > 0)
+	if (tunable_data_connection_timeout > 0) //你要配置了这个选项
+		//                                     处理数据连接不传输数据的特殊case
 	{
 		// 安装信号
-		signal(SIGALRM, handle_sigalrm);
+		signal(SIGALRM, handle_sigalrm); //数据传输的闹钟信号
 		// 启动闹钟
 		alarm(tunable_data_connection_timeout);
 	}
 	else if (tunable_idle_session_timeout > 0)
 	{
 		// 关闭先前安装的闹钟
-		alarm(0);
+		alarm(0); //主要是为了我在数据传输的时候，为控制连接而设立的闹钟不要影响到我！
+		//等我数据连接传输完毕了，我会再开启你这个控制连接的闹钟的。
 	}
 }
 
@@ -213,7 +216,7 @@ void handle_child(session_t *sess)
 		memset(sess->cmd, 0, sizeof(sess->cmd)); //命令
 		memset(sess->arg, 0, sizeof(sess->arg)); //参数
 
-		start_cmdio_alarm();
+		start_cmdio_alarm();  //安装闹钟咯(处理空闲断开)
 
 		ret = readline(sess->ctrl_fd, sess->cmdline, MAX_COMMAND_LINE);
 		if (ret == -1)
@@ -345,7 +348,7 @@ int list_common(session_t *sess, int detail)
 
 void limit_rate(session_t *sess, int bytes_transfered, int is_upload)
 {
-	sess->data_process = 1;
+	sess->data_process = 1;  //在这里标记数据正在传输中是不太妥当的
 
 	// 睡眠时间 = (当前传输速度 / 最大传输速度 – 1) * 当前传输时间;
 	long curr_sec = get_time_sec();
@@ -408,13 +411,13 @@ void upload_common(session_t *sess, int is_append)
 		return;
 	}
 
-	long long offset = sess->restart_pos;
-	sess->restart_pos = 0;
+	long long offset = sess->restart_pos;  //断点的话先从REST命令拿到断点位置
+	sess->restart_pos = 0;  //重新置0
 
-	// 打开文件
-	int fd = open(sess->arg, O_CREAT | O_WRONLY, 0666);
+	// 打开且创建文件(这个有可能给的是设备文件名,所以后面是需要做判断的)
+	int fd = open(sess->arg, O_CREAT | O_WRONLY, 0666); //创建且只写的方式打开文件
 	if (fd == -1)
-	{
+	{   //失败响应
 		ftp_reply(sess, FTP_UPLOADFAIL, "Could not create file.");
 		return;
 	}
@@ -433,8 +436,9 @@ void upload_common(session_t *sess, int is_append)
 	// APPE
 	if (!is_append && offset == 0)		// STOR
 	{
+		//这种模式下，文件可能是存在的，我们将它清零一下
 		ftruncate(fd, 0);
-		if (lseek(fd, 0, SEEK_SET) < 0)
+		if (lseek(fd, 0, SEEK_SET) < 0) //然后文件偏移到文件头的位置
 		{
 			ftp_reply(sess, FTP_UPLOADFAIL, "Could not create file.");
 			return;
@@ -442,7 +446,7 @@ void upload_common(session_t *sess, int is_append)
 	}
 	else if (!is_append && offset != 0)		// REST+STOR
 	{
-		if (lseek(fd, offset, SEEK_SET) < 0)
+		if (lseek(fd, offset, SEEK_SET) < 0) //续传偏移到断点位置
 		{
 			ftp_reply(sess, FTP_UPLOADFAIL, "Could not create file.");
 			return;
@@ -450,7 +454,9 @@ void upload_common(session_t *sess, int is_append)
 	}
 	else if (is_append)				// APPE
 	{
-		if (lseek(fd, 0, SEEK_END) < 0)
+		//事实上，这种模式下，客户端自己也要维护一个文件尾的偏移量
+		//我们服务器只需要偏移到末尾即可。
+		if (lseek(fd, 0, SEEK_END) < 0) //追加偏移到文件的末尾
 		{
 			ftp_reply(sess, FTP_UPLOADFAIL, "Could not create file.");
 			return;
@@ -458,7 +464,7 @@ void upload_common(session_t *sess, int is_append)
 	}
 	struct stat sbuf;
 	ret = fstat(fd, &sbuf);
-	if (!S_ISREG(sbuf.st_mode))
+	if (!S_ISREG(sbuf.st_mode))   //有必要的
 	{
 		ftp_reply(sess, FTP_UPLOADFAIL, "Could not create file.");
 		return;
@@ -502,7 +508,7 @@ void upload_common(session_t *sess, int is_append)
 				break;
 			}
 		}
-		else if (ret == 0)
+		else if (ret == 0) //对方关闭了连接
 		{
 			flag = 0;
 			break;
@@ -515,7 +521,7 @@ void upload_common(session_t *sess, int is_append)
 			break;
 		}
 
-		if (writen(fd, buf, ret) != ret)
+		if (writen(fd, buf, ret) != ret)  //写入到文件中
 		{
 			flag = 1;
 			break;
@@ -531,7 +537,7 @@ void upload_common(session_t *sess, int is_append)
 
 	if (flag == 0 && !sess->abor_received)
 	{
-		// 226
+		// 226 //成功的应答
 		ftp_reply(sess, FTP_TRANSFEROK, "Transfer complete.");
 	}
 	else if (flag == 1)
@@ -707,7 +713,8 @@ int get_transfer_fd(session_t *sess)
 
 	if (ret)
 	{
-		// 重新安装SIGALRM信号，并启动闹钟
+		// 重新安装SIGALRM信号(为了数据连接)，并启动闹钟
+		// 当数据套接字创建好以后，我们认为数据连接启动。
 		start_data_alarm();
 	}
 
@@ -795,7 +802,7 @@ static void do_cdup(session_t *sess)
 static void do_quit(session_t *sess)
 {
 	ftp_reply(sess, FTP_GOODBYE, "Goodbye.");
-	exit(EXIT_SUCCESS);  //孙子进程退出
+	exit(EXIT_SUCCESS);  //孙子进程退出,将会导致儿子进程跟着退出
 }
 
 static void do_port(session_t *sess)
@@ -1002,7 +1009,7 @@ static void do_retr(session_t *sess)
 	long long bytes_to_send = sbuf.st_size;
 	if (offset > bytes_to_send) //断点位置比整个文件大小还要大
 	{
-		bytes_to_send = 0; //没有数据可以发送
+		bytes_to_send = 0; //那么没有数据可以发送
 	}
 	else
 	{
@@ -1016,6 +1023,7 @@ static void do_retr(session_t *sess)
 	while (bytes_to_send)
 	{
 		//不足4096，发送实际还剩下的字节数
+		//是否可以更大以加快速度
 		int num_this_time = bytes_to_send > 4096 ? 4096 : bytes_to_send;
 		//调用sendfile，一次发送4096字节
 
@@ -1067,7 +1075,7 @@ static void do_retr(session_t *sess)
 	}
 
 	check_abor(sess);
-	// 重新开启控制连接通道闹钟
+	// 重新开启控制连接通道闹钟(别忘啦)
 	start_cmdio_alarm();
 	
 }
