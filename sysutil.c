@@ -17,7 +17,7 @@ int tcp_client(unsigned short port)
 		struct sockaddr_in localaddr;
 		memset(&localaddr, 0, sizeof(localaddr));
 		localaddr.sin_family = AF_INET;
-		localaddr.sin_port = htons(port); 
+		localaddr.sin_port = htons(port);
 		localaddr.sin_addr.s_addr = inet_addr(ip);
 		if (bind(sock, (struct sockaddr*)&localaddr, sizeof(localaddr)) < 0)
 			ERR_EXIT("bind");
@@ -27,10 +27,10 @@ int tcp_client(unsigned short port)
 }
 
 /**
- * tcp_server - ï¿½ï¿½ï¿½ï¿½tcpï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
- * @host: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½IPï¿½ï¿½Ö·ï¿½ï¿½ï¿½ß·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
- * @port: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¿ï¿½
- * ï¿½É¹ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½ï¿½ï¿½×½ï¿½ï¿½ï¿½
+ * tcp_server - Æô¶¯tcp·þÎñÆ÷
+ * @host: ·þÎñÆ÷IPµØÖ·»òÕß·þÎñÆ÷Ö÷»úÃû
+ * @port: ·þÎñÆ÷¶Ë¿Ú
+ * ³É¹¦·µ»Ø¼àÌýÌ×½Ó×Ö
  */
 int tcp_server(const char *host, unsigned short port)
 {
@@ -86,8 +86,8 @@ int getlocalip(char *ip)
 
 
 /**
- * activate_noblock - ï¿½ï¿½ï¿½ï¿½I/OÎªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½
- * @fd: ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * activate_noblock - ÉèÖÃI/OÎª·Ç×èÈûÄ£Ê½
+ * @fd: ÎÄ¼þÃè·û·û
  */
 void activate_nonblock(int fd)
 {
@@ -103,8 +103,8 @@ void activate_nonblock(int fd)
 }
 
 /**
- * deactivate_nonblock - ï¿½ï¿½ï¿½ï¿½I/OÎªï¿½ï¿½ï¿½ï¿½Ä£Ê½
- * @fd: ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * deactivate_nonblock - ÉèÖÃI/OÎª×èÈûÄ£Ê½
+ * @fd: ÎÄ¼þÃè·û·û
  */
 void deactivate_nonblock(int fd)
 {
@@ -120,10 +120,10 @@ void deactivate_nonblock(int fd)
 }
 
 /**
- * read_timeout - ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½âº¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
- * @fd: ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
- * @wait_seconds: ï¿½È´ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª0ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½â³¬Ê±
- * ï¿½É¹ï¿½ï¿½ï¿½Î´ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½-1ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1ï¿½ï¿½ï¿½ï¿½errno = ETIMEDOUT
+ * read_timeout - ¶Á³¬Ê±¼ì²âº¯Êý£¬²»º¬¶Á²Ù×÷
+ * @fd: ÎÄ¼þÃèÊö·û
+ * @wait_seconds: µÈ´ý³¬Ê±ÃëÊý£¬Èç¹ûÎª0±íÊ¾²»¼ì²â³¬Ê±
+ * ³É¹¦£¨Î´³¬Ê±£©·µ»Ø0£¬Ê§°Ü·µ»Ø-1£¬³¬Ê±·µ»Ø-1²¢ÇÒerrno = ETIMEDOUT
  */
 int read_timeout(int fd, unsigned int wait_seconds)
 {
@@ -156,10 +156,10 @@ int read_timeout(int fd, unsigned int wait_seconds)
 }
 
 /**
- * write_timeout - ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½âº¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½
- * @fd: ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
- * @wait_seconds: ï¿½È´ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª0ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½â³¬Ê±
- * ï¿½É¹ï¿½ï¿½ï¿½Î´ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½-1ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1ï¿½ï¿½ï¿½ï¿½errno = ETIMEDOUT
+ * write_timeout - ¶Á³¬Ê±¼ì²âº¯Êý£¬²»º¬Ð´²Ù×÷
+ * @fd: ÎÄ¼þÃèÊö·û
+ * @wait_seconds: µÈ´ý³¬Ê±ÃëÊý£¬Èç¹ûÎª0±íÊ¾²»¼ì²â³¬Ê±
+ * ³É¹¦£¨Î´³¬Ê±£©·µ»Ø0£¬Ê§°Ü·µ»Ø-1£¬³¬Ê±·µ»Ø-1²¢ÇÒerrno = ETIMEDOUT
  */
 int write_timeout(int fd, unsigned int wait_seconds)
 {
@@ -192,11 +192,11 @@ int write_timeout(int fd, unsigned int wait_seconds)
 }
 
 /**
- * accept_timeout - ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½accept
- * @fd: ï¿½×½ï¿½ï¿½ï¿½
- * @addr: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¶Ô·ï¿½ï¿½ï¿½Ö·
- * @wait_seconds: ï¿½È´ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª0ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Ä£Ê½
- * ï¿½É¹ï¿½ï¿½ï¿½Î´ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1ï¿½ï¿½ï¿½ï¿½errno = ETIMEDOUT
+ * accept_timeout - ´ø³¬Ê±µÄaccept
+ * @fd: Ì×½Ó×Ö
+ * @addr: Êä³ö²ÎÊý£¬·µ»Ø¶Ô·½µØÖ·
+ * @wait_seconds: µÈ´ý³¬Ê±ÃëÊý£¬Èç¹ûÎª0±íÊ¾Õý³£Ä£Ê½
+ * ³É¹¦£¨Î´³¬Ê±£©·µ»ØÒÑÁ¬½ÓÌ×½Ó×Ö£¬³¬Ê±·µ»Ø-1²¢ÇÒerrno = ETIMEDOUT
  */
 int accept_timeout(int fd, struct sockaddr_in *addr, unsigned int wait_seconds)
 {
@@ -237,10 +237,10 @@ int accept_timeout(int fd, struct sockaddr_in *addr, unsigned int wait_seconds)
 
 /**
  * connect_timeout - connect
- * @fd: ï¿½×½ï¿½ï¿½ï¿½
- * @addr: Òªï¿½ï¿½ï¿½ÓµÄ¶Ô·ï¿½ï¿½ï¿½Ö·
- * @wait_seconds: ï¿½È´ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª0ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Ä£Ê½
- * ï¿½É¹ï¿½ï¿½ï¿½Î´ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½-1ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1ï¿½ï¿½ï¿½ï¿½errno = ETIMEDOUT
+ * @fd: Ì×½Ó×Ö
+ * @addr: ÒªÁ¬½ÓµÄ¶Ô·½µØÖ·
+ * @wait_seconds: µÈ´ý³¬Ê±ÃëÊý£¬Èç¹ûÎª0±íÊ¾Õý³£Ä£Ê½
+ * ³É¹¦£¨Î´³¬Ê±£©·µ»Ø0£¬Ê§°Ü·µ»Ø-1£¬³¬Ê±·µ»Ø-1²¢ÇÒerrno = ETIMEDOUT
  */
 int connect_timeout(int fd, struct sockaddr_in *addr, unsigned int wait_seconds)
 {
@@ -262,7 +262,7 @@ int connect_timeout(int fd, struct sockaddr_in *addr, unsigned int wait_seconds)
 		timeout.tv_usec = 0;
 		do
 		{
-			/* Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Ó½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×½ï¿½ï¿½Ö¾Í¿ï¿½Ð´ */
+			/* Ò»Á¿Á¬½Ó½¨Á¢£¬Ì×½Ó×Ö¾Í¿ÉÐ´ */
 			ret = select(fd + 1, NULL, &connect_fdset, NULL, &timeout);
 		} while (ret < 0 && errno == EINTR);
 		if (ret == 0)
@@ -275,8 +275,8 @@ int connect_timeout(int fd, struct sockaddr_in *addr, unsigned int wait_seconds)
 		else if (ret == 1)
 		{
 			//printf("BBBBB\n");
-			/* retï¿½ï¿½ï¿½ï¿½Îª1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó½ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½×½ï¿½ï¿½Ö²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
-			/* ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½á±£ï¿½ï¿½ï¿½ï¿½errnoï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½Ë£ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½getsockoptï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ */
+			/* ret·µ»ØÎª1£¬¿ÉÄÜÓÐÁ½ÖÖÇé¿ö£¬Ò»ÖÖÊÇÁ¬½Ó½¨Á¢³É¹¦£¬Ò»ÖÖÊÇÌ×½Ó×Ö²úÉú´íÎó£¬*/
+			/* ´ËÊ±´íÎóÐÅÏ¢²»»á±£´æÖÁerrno±äÁ¿ÖÐ£¬Òò´Ë£¬ÐèÒªµ÷ÓÃgetsockoptÀ´»ñÈ¡¡£ */
 			int err;
 			socklen_t socklen = sizeof(err);
 			int sockoptret = getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &socklen);
@@ -305,11 +305,11 @@ int connect_timeout(int fd, struct sockaddr_in *addr, unsigned int wait_seconds)
 }
 
 /**
- * readn - ï¿½ï¿½È¡ï¿½Ì¶ï¿½ï¿½Ö½ï¿½ï¿½ï¿½
- * @fd: ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
- * @buf: ï¿½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½
- * @count: Òªï¿½ï¿½È¡ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½
- * ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½countï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½-1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½EOFï¿½ï¿½ï¿½ï¿½<count
+ * readn - ¶ÁÈ¡¹Ì¶¨×Ö½ÚÊý
+ * @fd: ÎÄ¼þÃèÊö·û
+ * @buf: ½ÓÊÕ»º³åÇø
+ * @count: Òª¶ÁÈ¡µÄ×Ö½ÚÊý
+ * ³É¹¦·µ»Øcount£¬Ê§°Ü·µ»Ø-1£¬¶Áµ½EOF·µ»Ø<count
  */
 ssize_t readn(int fd, void *buf, size_t count)
 {
@@ -336,11 +336,11 @@ ssize_t readn(int fd, void *buf, size_t count)
 }
 
 /**
- * writen - ï¿½ï¿½ï¿½Í¹Ì¶ï¿½ï¿½Ö½ï¿½ï¿½ï¿½
- * @fd: ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
- * @buf: ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½
- * @count: Òªï¿½ï¿½È¡ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½
- * ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½countï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½-1
+ * writen - ·¢ËÍ¹Ì¶¨×Ö½ÚÊý
+ * @fd: ÎÄ¼þÃèÊö·û
+ * @buf: ·¢ËÍ»º³åÇø
+ * @count: Òª¶ÁÈ¡µÄ×Ö½ÚÊý
+ * ³É¹¦·µ»Øcount£¬Ê§°Ü·µ»Ø-1
  */
 ssize_t writen(int fd, const void *buf, size_t count)
 {
@@ -367,11 +367,11 @@ ssize_t writen(int fd, const void *buf, size_t count)
 }
 
 /**
- * recv_peek - ï¿½ï¿½ï¿½ï¿½ï¿½é¿´ï¿½×½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½ï¿½ï¿½
- * @sockfd: ï¿½×½ï¿½ï¿½ï¿½
- * @buf: ï¿½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½
- * @len: ï¿½ï¿½ï¿½ï¿½
- * ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½>=0ï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½-1
+ * recv_peek - ½ö½ö²é¿´Ì×½Ó×Ö»º³åÇøÊý¾Ý£¬µ«²»ÒÆ³ýÊý¾Ý
+ * @sockfd: Ì×½Ó×Ö
+ * @buf: ½ÓÊÕ»º³åÇø
+ * @len: ³¤¶È
+ * ³É¹¦·µ»Ø>=0£¬Ê§°Ü·µ»Ø-1
  */
 ssize_t recv_peek(int sockfd, void *buf, size_t len)
 {
@@ -385,11 +385,11 @@ ssize_t recv_peek(int sockfd, void *buf, size_t len)
 }
 
 /**
- * readline - ï¿½ï¿½ï¿½Ð¶ï¿½È¡ï¿½ï¿½ï¿½ï¿½
- * @sockfd: ï¿½×½ï¿½ï¿½ï¿½
- * @buf: ï¿½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½
- * @maxline: Ã¿ï¿½ï¿½ï¿½ï¿½ó³¤¶ï¿½
- * ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½>=0ï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½-1
+ * readline - °´ÐÐ¶ÁÈ¡Êý¾Ý
+ * @sockfd: Ì×½Ó×Ö
+ * @buf: ½ÓÊÕ»º³åÇø
+ * @maxline: Ã¿ÐÐ×î´ó³¤¶È
+ * ³É¹¦·µ»Ø>=0£¬Ê§°Ü·µ»Ø-1
  */
 ssize_t readline(int sockfd, void *buf, size_t maxline)
 {
@@ -609,15 +609,15 @@ static int lock_internal(int fd, int lock_type)
 	int ret;
 	struct flock the_lock;
 	memset(&the_lock, 0, sizeof(the_lock));
-	the_lock.l_type = lock_type;   //read or write
-	the_lock.l_whence = SEEK_SET;  //start postion of the file
+	the_lock.l_type = lock_type;
+	the_lock.l_whence = SEEK_SET;
 	the_lock.l_start = 0;
 	the_lock.l_len = 0;
 	do
 	{
-		ret = fcntl(fd, F_SETLKW, &the_lock);  //'W express if lock failed then i will wiat
+		ret = fcntl(fd, F_SETLKW, &the_lock);
 	}
-	while (ret < 0 && errno == EINTR); //to deal with signal interrupt
+	while (ret < 0 && errno == EINTR);
 
 	return ret;
 }
@@ -676,8 +676,8 @@ long get_time_usec(void)
 
 void nano_sleep(double seconds)
 {
-	time_t secs = (time_t)seconds;					// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	double fractional = seconds - (double)secs;		// Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	time_t secs = (time_t)seconds;					// ÕûÊý²¿·Ö
+	double fractional = seconds - (double)secs;		// Ð¡Êý²¿·Ö
 
 	struct timespec ts;
 	ts.tv_sec = secs;
@@ -691,7 +691,7 @@ void nano_sleep(double seconds)
 	while (ret == -1 && errno == EINTR);
 }
 
-// ï¿½ï¿½ï¿½ï¿½ï¿½×½ï¿½ï¿½ï¿½fdï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÝµÄ¹ï¿½ï¿½ï¿½
+// ¿ªÆôÌ×½Ó×Öfd½ÓÊÕ´øÍâÊý¾ÝµÄ¹¦ÄÜ
 void activate_oobinline(int fd)
 {
 	int oob_inline = 1;
@@ -703,8 +703,8 @@ void activate_oobinline(int fd)
 	}
 }
 
-// ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½fdï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½Ê±ï¿½ò£¬½ï¿½ï¿½ï¿½ï¿½ï¿½SIGURGï¿½ÅºÅ£ï¿½
-// ï¿½Ãºï¿½ï¿½ï¿½ï¿½è¶¨ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Ü¹ï¿½ï¿½ï¿½ï¿½ï¿½fdï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½SIGURGï¿½Åºï¿½
+// µ±ÎÄ¼þÃèÊöfdÉÏÓÐ´øÍâÊý¾ÝµÄÊ±ºò£¬½«²úÉúSIGURGÐÅºÅ£¬
+// ¸Ãº¯ÊýÉè¶¨µ±Ç°½ø³ÌÄÜ¹»½ÓÊÕfdÎÄ¼þÃèÊö·ûËù²úÉúµÄSIGURGÐÅºÅ
 void activate_sigurg(int fd)
 {
 	int ret;
