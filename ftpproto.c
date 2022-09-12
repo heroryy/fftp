@@ -10,7 +10,7 @@ void ftp_lreply(session_t *sess, int status, const char *text);
 
 void handle_alarm_timeout(int sig); //处理闹钟
 void handle_sigalrm(int sig);  //处理重新安装的闹钟信号(主要是数据连接空闲带来了影响)
-void handle_sigurg(int sig);
+void handle_sigurg(int sig);   //处理SIGRUG信号，此时意味着接收了外带数据，即可能是收到了ABORcmd
 void start_cmdio_alarm(void);  //开始闹钟。控制连接闹钟。
 void start_data_alarm(void);   //重新安装闹钟信号，之前的自动失效。数据连接闹钟
 
@@ -54,7 +54,7 @@ static void do_syst(session_t *sess);
 static void do_feat(session_t *sess);
 static void do_size(session_t *sess);
 static void do_stat(session_t *sess);
-static void do_noop(session_t *sess);
+static void do_noop(session_t *sess);  //仅仅是为了防止空闲断开
 static void do_help(session_t *sess);
 
 
@@ -142,7 +142,7 @@ void handle_sigalrm(int sig)
 
 void handle_sigurg(int sig)
 {
-	if (p_sess->data_fd == -1)
+	if (p_sess->data_fd == -1)  //没有处于数据传输的状态，无需再处理
 	{
 		return;
 	}
@@ -153,14 +153,14 @@ void handle_sigurg(int sig)
 	{
 		ERR_EXIT("readline");
 	}
-	str_trim_crlf(cmdline);
+	str_trim_crlf(cmdline); //ABOR命令(没有参数)可能收到这两种形式的字符串
 	if (strcmp(cmdline, "ABOR") == 0
 		|| strcmp(cmdline, "\377\364\377\362ABOR") == 0)
 	{
-		p_sess->abor_received = 1;
-		shutdown(p_sess->data_fd, SHUT_RDWR);
+		p_sess->abor_received = 1; //标记收到了ABOR命令
+		shutdown(p_sess->data_fd, SHUT_RDWR); //读写的都断开,不能再传输数据了
 	}
-	else
+	else  //非法的命令
 	{
 		ftp_reply(p_sess, FTP_BADCMD, "Unknown command.");
 	}
@@ -168,10 +168,10 @@ void handle_sigurg(int sig)
 
 void check_abor(session_t *sess)
 {
-	if (sess->abor_received)
+	if (sess->abor_received) //有接收到ABOR命令
 	{
-		sess->abor_received = 0;
-		ftp_reply(p_sess, FTP_ABOROK, "ABOR successful.");
+		sess->abor_received = 0; //置为0
+		ftp_reply(p_sess, FTP_ABOROK, "ABOR successful.");//处理完毕226应答
 	}
 }
 
@@ -217,7 +217,7 @@ void handle_child(session_t *sess)
 		memset(sess->arg, 0, sizeof(sess->arg)); //参数
 
 		start_cmdio_alarm();  //安装闹钟咯(处理空闲断开)
-
+						      //每接收一次命令，就刷新一次闹钟
 		ret = readline(sess->ctrl_fd, sess->cmdline, MAX_COMMAND_LINE);
 		if (ret == -1)
 			ERR_EXIT("readline");
@@ -301,15 +301,15 @@ int list_common(session_t *sess, int detail)
 	struct stat sbuf;
 	while ((dt = readdir(dir)) != NULL)
 	{
-		if (lstat(dt->d_name, &sbuf) < 0)
+		if (lstat(dt->d_name, &sbuf) < 0) //lstat，如果是软链接，返回链接文件本身的信息
 		{
-			continue;
+			continue; //一个文件失败了，不要直接结束，继续即可
 		}
-		if (dt->d_name[0] == '.')
+		if (dt->d_name[0] == '.') //不显示隐藏文件
 			continue;
 
 		char buf[1024] = {0};
-		if (detail)
+		if (detail)  //是否详细显示
 		{
 			const char *perms = statbuf_get_perms(&sbuf);
 
@@ -767,8 +767,8 @@ static void do_pass(session_t *sess)
 		return;
 	}
 
-	signal(SIGURG, handle_sigurg);
-	activate_sigurg(sess->ctrl_fd);
+	signal(SIGURG, handle_sigurg);  //为SIGURG注册处理函数
+	activate_sigurg(sess->ctrl_fd); //开启该fd能够接收sigurg信号
 
 	umask(tunable_local_umask);
 	setegid(pw->pw_gid);
@@ -1058,8 +1058,8 @@ static void do_retr(session_t *sess)
 
 	
 
-	if (flag == 0 && !sess->abor_received)
-	{
+	if (flag == 0 && !sess->abor_received) //如果是刚好传输完了接收到了abor命令
+	{                                      //我们推迟一下响应。在check_abor中做响应。
 		// 226
 		ftp_reply(sess, FTP_TRANSFEROK, "Transfer complete.");
 	}
@@ -1074,7 +1074,9 @@ static void do_retr(session_t *sess)
 		ftp_reply(sess, FTP_BADSENDNET, "Failure writting to network stream.");
 	}
 
-	check_abor(sess);
+	check_abor(sess);  //刚好数据传输做完了，但是有abor命令过来
+	                   //我们也应该检测一下。检测的是控制连接fd，
+					   //放这里是没问题的，上面关闭的是数据连接fd。
 	// 重新开启控制连接通道闹钟(别忘啦)
 	start_cmdio_alarm();
 	
@@ -1138,8 +1140,8 @@ static void do_rest(session_t *sess)  //先发送REST命令，服务端记录断点位置。再上
 	ftp_reply(sess, FTP_RESTOK, text);
 }
 
-static void do_abor(session_t *sess)
-{
+static void do_abor(session_t *sess) //此时没有数据在传输，走到不是紧急通道
+{                                    //直接响应一个没有在进行数据传输即可
 	ftp_reply(sess, FTP_ABOR_NOCONN, "No transfer to ABOR");
 	
 }

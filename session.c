@@ -7,8 +7,8 @@
 
 void begin_session(session_t *sess)
 {
-	//开启套接字fd接收带外数据的功能
-	activate_oobinline(sess->ctrl_fd); 
+	//控制连接开启通信套接字fd接收带外数据的功能
+	activate_oobinline(sess->ctrl_fd);  
 	/*
 	int sockfds[2];
 	if (socketpair(PF_UNIX, SOCK_STREAM, 0, sockfds) < 0)

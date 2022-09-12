@@ -31,16 +31,19 @@ void minimize_privilege(void)
 	memset(&cap_header, 0, sizeof(cap_header));
 	memset(&cap_data, 0, sizeof(cap_data));
 
-	cap_header.version = _LINUX_CAPABILITY_VERSION_1;
-	cap_header.pid = 0;
+	cap_header.version = _LINUX_CAPABILITY_VERSION_1;  //32bit system
+	cap_header.pid = 0; //capset dont neet pid,but capget need a pid to distinguishing
 
-	__u32 cap_mask = 0;
-	cap_mask |= (1 << CAP_NET_BIND_SERVICE);
+	__u32 cap_mask = 0;  // be zero per bit of a 32bit integer 
+	cap_mask |= (1 << CAP_NET_BIND_SERVICE); //set the 10th bit to one
 
+	//usually,effective equal to permitted and the value is power.
 	cap_data.effective = cap_data.permitted = cap_mask;
-	cap_data.inheritable = 0;
+	cap_data.inheritable = 0; //this is while use exec family of functoins whether can be inherited,but now,we dont need.
 
-	capset(&cap_header, &cap_data);
+	capset(&cap_header, &cap_data); //to use capset directly will have warning.
+	                                //in fact,capset is a kernel interface.
+									//we can define a capset independent to avoid warning.
 }
 
 void handle_parent(session_t *sess)

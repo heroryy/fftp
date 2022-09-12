@@ -505,11 +505,11 @@ int recv_fd(const int sock_fd)
 
 const char* statbuf_get_perms(struct stat *sbuf)
 {
-	static char perms[] = "----------";
-	perms[0] = '?';
+	static char perms[] = "----------";  //init
+	perms[0] = '?';  //init
 
 	mode_t mode = sbuf->st_mode;
-	switch (mode & S_IFMT)
+	switch (mode & S_IFMT) //get file type
 	{
 	case S_IFREG:
 		perms[0] = '-';
@@ -534,7 +534,7 @@ const char* statbuf_get_perms(struct stat *sbuf)
 		break;
 	}
 
-	if (mode & S_IRUSR)
+	if (mode & S_IRUSR)  //存在这个文件就给予对应的显示，否则显示'-'
 	{
 		perms[1] = 'r';
 	}
@@ -691,10 +691,10 @@ void nano_sleep(double seconds)
 	while (ret == -1 && errno == EINTR);
 }
 
-// 开启套接字fd接收带外数据的功能
+// 开启套接字fd接收带外数据的功能(紧急模式)
 void activate_oobinline(int fd)
 {
-	int oob_inline = 1;
+	int oob_inline = 1; //1代表开启
 	int ret;
 	ret = setsockopt(fd, SOL_SOCKET, SO_OOBINLINE, &oob_inline, sizeof(oob_inline));
 	if (ret == -1)
