@@ -493,7 +493,7 @@ void upload_common(session_t *sess, int is_append)
 	sess->bw_transfer_start_sec = get_time_sec();
 	sess->bw_transfer_start_usec = get_time_usec();
 
-	while (1)
+	while (1)  //循环读完对方发送过来的数据
 	{
 		ret = read(sess->data_fd, buf, sizeof(buf));
 		if (ret == -1)
@@ -599,7 +599,7 @@ int pasv_active(session_t *sess)
 	return 0;
 }
 
-int get_port_fd(session_t *sess)
+int get_port_fd(session_t *sess)   //得到主动模式下的数据传输套接字
 {
 	/*
 	向nobody发送PRIV_SOCK_GET_DATA_SOCK命令        1
@@ -628,7 +628,7 @@ int get_port_fd(session_t *sess)
 	return 1;
 }
 
-int get_pasv_fd(session_t *sess)
+int get_pasv_fd(session_t *sess) //得到被动模式数据传输套接字
 {
 	priv_sock_send_cmd(sess->child_fd, PRIV_SOCK_PASV_ACCEPT);
 	char res = priv_sock_get_result(sess->child_fd);
@@ -644,7 +644,7 @@ int get_pasv_fd(session_t *sess)
 	return 1;
 }
 
-int get_transfer_fd(session_t *sess)
+int get_transfer_fd(session_t *sess) //得到数据传输套接字(主动或者被动)
 {
 	// 检测是否收到PORT或者PASV命令
 	if (!port_active(sess) && !pasv_active(sess))

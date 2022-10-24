@@ -90,6 +90,9 @@ OK
 send_fd
 BAD
 */
+
+	//为什么要进行port和ip，因为nobody进程和ftp服务进程的session的信息不是共享的(写时复制)，
+	//所以需要进行传输。
 	unsigned short port = (unsigned short)priv_sock_get_int(sess->parent_fd);
 	char ip[16] = {0};
 	priv_sock_recv_buf(sess->parent_fd, ip, sizeof(ip));
@@ -118,7 +121,7 @@ BAD
 
 	priv_sock_send_result(sess->parent_fd, PRIV_SOCK_RESULT_OK); //发回成功响应
 	priv_sock_send_fd(sess->parent_fd, fd);  //然后发回这条数据连接通信的fd
-	close(fd); //为什么要关？
+	close(fd); //为什么要关？因为它是辅助创建数据连接的进程，而不进行数据连接。所以关了
 }
 
 static void privop_pasv_active(session_t *sess)
